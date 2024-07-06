@@ -1,4 +1,5 @@
 import sys
+from typing import Callable, Iterable, Dict
 from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtGui import QIcon
 from ui_apps.ui import Ui_Form  # Ganti dengan nama modul yang sesuai
@@ -17,11 +18,18 @@ class MyApp(QWidget):
         self.setWindowIcon(QIcon('assets/kunci.png'))  
 
         # inisialisasi untuk menyimpan nilai dari slider
-        self.nilai = 0
+        self.nilai: int = 0
 
+        # inisialisai dict untuk menyimpan nilai bool
+        self.data: Dict[str, bool] = {
+            'checkBox': False,
+            'checkBox_2': False,
+            'checkBox_3': False,
+            'checkBox_4': False,
+        }
+        
         # Inisialisasi dictionary untuk menyimpan checkBox
-        self.data = {}
-        self.check_boxes = {
+        self.check_boxes: Dict[str, bool] = {
             'checkBox': self.ui.checkBox,
             'checkBox_2': self.ui.checkBox_2,
             'checkBox_3': self.ui.checkBox_3,
@@ -59,25 +67,28 @@ class MyApp(QWidget):
         self.nilai = value
 
     def saat_ditekan(self):
-        # print("Berjalan dengan baik")
-        if len(self.data) > 0 and self.nilai > 0:
-            for i, v in self.data.items():
-                if i == 'checkBox' and v == True:
-                    self.ui.lineEdit.clear()
-                    self.ui.lineEdit.setText(RandString("uppercase", self.nilai))
-                if i == 'checkBox_2' and v == True:
-                    self.ui.lineEdit.clear()
-                    self.ui.lineEdit.setText(RandString("lowercase", self.nilai))
-                if i == 'checkBox_3' and v == True:
-                    self.ui.lineEdit.clear()
-                    self.ui.lineEdit.setText(RandString("digits", self.nilai))
-                if i == 'checkBox_4' and v == True:
-                    self.ui.lineEdit.clear()
-                    self.ui.lineEdit.setText(RandString("ascii", self.nilai))
+        # menyimpan data.values
+        vv: Iterable[bool] = list(self.data.values())
+
+        # Mendefinisikan tipe data untuk parameter dan nilai kembalian
+        baris: Callable[[str, str, bool], None] = lambda p, q, r=False: self.ui.lineEdit.setText(RandString(p, q, r))
+
+        if self.nilai > 0:
+            if all(vv):
+                self.ui.lineEdit.clear()
+                baris('mixed', self.nilai, True)
+            elif all([vv[0], not vv[1], not vv[2], not vv[3]]):
+                baris('uppercase', self.nilai)
+            elif all([not vv[0], vv[1], not vv[2], not vv[3]]):
+                baris('lowercase', self.nilai)
+            elif all([not vv[0], not vv[1], vv[2], not vv[3]]):
+                baris('digits', self.nilai)
+            elif all([not vv[0], not vv[1], not vv[2], vv[3]]):
+                baris('ascii', self.nilai)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MyApp()
     window.show()
-    apply_stylesheet(app, theme='dark_blue.xml')
+    apply_stylesheet(app, theme='light_blue.xml')
     sys.exit(app.exec_())
