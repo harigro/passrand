@@ -2,9 +2,9 @@ import sys
 from typing import Callable, Iterable, Dict
 from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtGui import QIcon
-from ui_apps.ui import Ui_Form  # Ganti dengan nama modul yang sesuai
+from units.ui import Ui_Form  # Ganti dengan nama modul yang sesuai
 from qt_material import apply_stylesheet
-from rand_string.rand_string import RandString
+from units.rand_string import RandString
 
 class MyApp(QWidget):
     def __init__(self):
@@ -47,6 +47,8 @@ class MyApp(QWidget):
         self.ui.horizontalSlider.setMinimum(0)
         self.ui.horizontalSlider.setMaximum(12)
 
+        #  atur baris edit hanya baca
+        self.ui.lineEdit.setReadOnly(True)
         # Hubungkan sinyal clicked dari pushButton ke metode self.saat_ditekan
         self.ui.pushButton.clicked.connect(self.saat_ditekan)
 
@@ -71,20 +73,21 @@ class MyApp(QWidget):
         vv: Iterable[bool] = list(self.data.values())
 
         # Mendefinisikan tipe data untuk parameter dan nilai kembalian
-        baris: Callable[[str, str, bool], None] = lambda p, q, r=False: self.ui.lineEdit.setText(RandString(p, q, r))
+        baris: Callable[[str, str], None] = lambda p, q: self.ui.lineEdit.setText(RandString(p, q))
 
-        if self.nilai > 0:
-            if all(vv):
-                self.ui.lineEdit.clear()
-                baris('mixed', self.nilai, True)
-            elif all([vv[0], not vv[1], not vv[2], not vv[3]]):
-                baris('uppercase', self.nilai)
-            elif all([not vv[0], vv[1], not vv[2], not vv[3]]):
-                baris('lowercase', self.nilai)
-            elif all([not vv[0], not vv[1], vv[2], not vv[3]]):
-                baris('digits', self.nilai)
-            elif all([not vv[0], not vv[1], not vv[2], vv[3]]):
-                baris('ascii', self.nilai)
+        # kode akan berjalan jika self.nilai lebih dari 0
+        if self.nilai > 0: 
+            baris('campuran' if all(vv) else
+                'besar' if vv[0] and not vv[1] and not vv[2] and not vv[3] else
+                'kecil' if not vv[0] and vv[1] and not vv[2] and not vv[3] else
+                'digit' if not vv[0] and not vv[1] and vv[2] and not vv[3] else
+                'tanda_baca' if not vv[0] and not vv[1] and not vv[2] and vv[3] else 
+                self.ui.lineEdit.clear(), self.nilai)
+        else:
+            self.ui.lineEdit.clear()
+
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
