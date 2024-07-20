@@ -1,10 +1,11 @@
 import sys
-from typing import Callable, Iterable, Dict
+from typing import Callable, List, Dict
 from PySide2.QtWidgets import QApplication, QWidget
 from PySide2.QtGui import QIcon
 from units.ui import Ui_Form  # Ganti dengan nama modul yang sesuai
 from qt_material import apply_stylesheet
 from units.rand_string import RandString
+from units.kombinasi import kombinasi_satu, kombinasi_dua, kombinasi_tiga
 
 class MyApp(QWidget):
     def __init__(self):
@@ -69,25 +70,47 @@ class MyApp(QWidget):
         self.nilai = value
 
     def saat_ditekan(self):
-        # menyimpan data.values
-        vv: Iterable[bool] = list(self.data.values())
+        vv: List[bool] = list(self.data.values())  # Menggunakan List[bool] daripada Iterable[bool] untuk vv
 
         # Mendefinisikan tipe data untuk parameter dan nilai kembalian
         baris: Callable[[str, str], None] = lambda p, q: self.ui.lineEdit.setText(RandString(p, q))
 
         # kode akan berjalan jika self.nilai lebih dari 0
-        if self.nilai > 0: 
-            baris('campuran' if all(vv) else
-                'besar' if vv[0] and not vv[1] and not vv[2] and not vv[3] else
-                'kecil' if not vv[0] and vv[1] and not vv[2] and not vv[3] else
-                'digit' if not vv[0] and not vv[1] and vv[2] and not vv[3] else
-                'tanda_baca' if not vv[0] and not vv[1] and not vv[2] and vv[3] else 
-                self.ui.lineEdit.clear(), self.nilai)
+        if self.nilai > 0:
+            if all(vv):
+                baris("campuran", self.nilai)
+            elif kombinasi_satu(vv, True, 1):
+                baris("besar", self.nilai)
+            elif kombinasi_satu(vv, True, 2):
+                baris("kecil", self.nilai)
+            elif kombinasi_satu(vv, True, 3):
+                baris("digit", self.nilai)
+            elif kombinasi_satu(vv, True, 4):
+                baris("tanda_baca", self.nilai)
+            elif kombinasi_dua(vv, True, 1):
+                baris("besar_kecil", self.nilai)
+            elif kombinasi_dua(vv, True, 2):
+                baris("besar_digit", self.nilai)
+            elif kombinasi_dua(vv, True, 3):
+                baris("besar_tanda_baca", self.nilai)
+            elif kombinasi_dua(vv, True, 4):
+                baris("kecil_digit", self.nilai)
+            elif kombinasi_dua(vv, True, 5):
+                baris("kecil_tanda_baca", self.nilai)
+            elif kombinasi_dua(vv, True, 6):
+                baris("digit_tanda_baca", self.nilai)
+            elif kombinasi_tiga(vv, True, 1):
+                baris("besar_kecil_digit", self.nilai)
+            elif kombinasi_tiga(vv, True, 2):
+                baris("besar_kecil_tanda_baca", self.nilai)
+            elif kombinasi_tiga(vv, True, 3):
+                baris("besar_digit_tanda_baca", self.nilai)
+            elif kombinasi_tiga(vv, True, 4):
+                baris("kecil_digit_tanda_baca", self.nilai)
+            else:
+                self.ui.lineEdit.clear()
         else:
             self.ui.lineEdit.clear()
-
-
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
